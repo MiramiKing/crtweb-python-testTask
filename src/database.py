@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from external_requests import GetWeatherRequest
+from external_requests import WeatherClient
 
 # Создание сессии
 SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
@@ -26,7 +26,7 @@ class City(Base):
         """
         Возвращает текущую погоду в этом городе
         """
-        r = GetWeatherRequest()
+        r = WeatherClient()
         weather = r.get_weather(self.name)
         return weather
 

@@ -1,7 +1,11 @@
 import datetime as dt
-from fastapi import FastAPI, HTTPException, Query
+
+import uvicorn
+from fastapi import FastAPI, HTTPException, Query, Response, status
+from sqlalchemy import or_
+
 from database import engine, Session, Base, City, User, Picnic, PicnicRegistration
-from external_requests import CheckCityExisting, GetWeatherRequest
+from external_requests import WeatherClient
 from models import RegisterUserRequest, UserModel
 
 app = FastAPI()
@@ -11,8 +15,8 @@ app = FastAPI()
 def create_city(city: str = Query(description="Название города", default=None)):
     if city is None:
         raise HTTPException(status_code=400, detail='Параметр city должен быть указан')
-    check = CheckCityExisting()
-    if not check.check_existing(city):
+    check = WeatherClient()
+    if not check.city_exists(city):
         raise HTTPException(status_code=400, detail='Параметр city должен быть существующим городом')
 
     city_object = Session().query(City).filter(City.name == city.capitalize()).first()
@@ -30,17 +34,31 @@ def cities_list(q: str = Query(description="Название города", defa
     """
     Получение списка городов
     """
-    cities = Session().query(City).all()
+    if q:
+        cities = Session().query(City).filter(City.name == q.capitalize())
+    else:
+        cities = Session().query(City).all()
 
     return [{'id': city.id, 'name': city.name, 'weather': city.weather} for city in cities]
 
 
 @app.post('/users-list/', summary='')
-def users_list():
+def users_list(min_age: int = Query(description="Минимальный возраст", default=None),
+               max_age: int = Query(description="Максимальный возраст", default=None)):
     """
     Список пользователей
     """
-    users = Session().query(User).all()
+    users = Session().query(User)
+
+    if not min_age and not max_age:
+        users = users.all()
+
+    if min_age:
+        users = users.filter(User.age >= min_age)
+
+    if max_age:
+        users = users.filter(User.age <= max_age)
+
     return [{
         'id': user.id,
         'name': user.name,
@@ -91,6 +109,17 @@ def all_picnics(datetime: dt.datetime = Query(default=None, description='Вре�
 
 @app.get('/picnic-add/', summary='Picnic Add', tags=['picnic'])
 def picnic_add(city_id: int = None, datetime: dt.datetime = None):
+    if not city_id:
+        raise HTTPException(status_code=400, detail='Параметр city_id не должен быть пустым')
+
+    city = Session().query(City).filter(City.id == city_id).first()
+
+    if not city:
+        raise HTTPException(status_code=400, detail='Параметр city_id должен быть существующим id города')
+
+    if not datetime:
+        raise HTTPException(status_code=400, detail='Параметр datetime не должен быть пустым')
+
     p = Picnic(city_id=city_id, time=datetime)
     s = Session()
     s.add(p)
@@ -98,17 +127,39 @@ def picnic_add(city_id: int = None, datetime: dt.datetime = None):
 
     return {
         'id': p.id,
-        'city': Session().query(City).filter(City.id == p.id).first().name,
-        'time': p.time,
+        'city': city.name,
+        'time': datetime,
     }
 
 
 @app.get('/picnic-register/', summary='Picnic Registration', tags=['picnic'])
-def register_to_picnic(*_, **__,):
+def register_to_picnic(user_id: int = None, picnic_id: int = None):
     """
     Регистрация пользователя на пикник
-    (Этот эндпойнт необходимо реализовать в процессе выполнения тестового задания)
     """
-    # TODO: Сделать логику
-    return ...
+    if not user_id:
+        raise HTTPException(status_code=400, detail='Параметр user_id не должен быть пустым')
 
+    user = Session().query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail='Параметр user_id должен быть существующим id Пользователя')
+
+    if not picnic_id:
+        raise HTTPException(status_code=400, detail='Параметр picnic_id не должен быть пустым')
+
+    picnic = Session().query(Picnic).filter(Picnic.id == picnic_id).first()
+
+    if not picnic:
+        raise HTTPException(status_code=400, detail='Параметр picnic_id должен быть существующим id Пикник')
+
+    p = PicnicRegistration(user_id=user_id, picnic_id=picnic_id)
+    s = Session()
+    s.add(p)
+    s.commit()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host='127.0.0.1', port=8000, debug=True)
