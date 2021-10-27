@@ -4,7 +4,7 @@ from src import schemas
 from fastapi import APIRouter, Depends
 
 from src.database import Session, User
-from src.models import UserModel, RegisterUserRequest
+from src.schemas import UserModel, RegisterUserRequest
 
 router = APIRouter(
     prefix='/users'
