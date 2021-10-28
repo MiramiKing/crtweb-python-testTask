@@ -1,9 +1,10 @@
 import logging
+from collections import Generator
+from fastapi import FastAPI
+from src.api import city_router, picnic_router, user_router
 import os
 
-import uvicorn
-from fastapi import FastAPI
-from api import city_router, picnic_router, user_router
+from src.database.session import SessionLocal
 
 logging.basicConfig(filename=os.path.join('logs/', 'logs' + '.log'),
                     filemode='a',
@@ -13,9 +14,15 @@ logging.basicConfig(filename=os.path.join('logs/', 'logs' + '.log'),
 
 app = FastAPI()
 
+
+def get_db() -> Generator:
+    try:
+        db = SessionLocal()
+        yield db
+    finally:
+        db.close()
+
+
 app.include_router(city_router)
 app.include_router(picnic_router)
 app.include_router(user_router)
-
-if __name__ == "__main__":
-    uvicorn.run(app, host='127.0.0.1', port=8000, debug=True)

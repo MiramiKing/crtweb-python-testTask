@@ -3,18 +3,14 @@ version: "3.8"
 services:
   backend:
     restart: always
-    depends_on:
-      - postgres
     build:
       context: .
       target: backend
-    environment:
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_NAME=testcrt
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=password
+    env_file:
+      - src/.env
     command: "uvicorn main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - "C:/Users/misha/log:/code/src/logs/"
     ports:
     - "8000:8000"
     networks:
@@ -25,18 +21,19 @@ services:
     restart: always
     image: postgres:13-alpine
     container_name: postgres
-    environment:
-      - POSTGRES_DB=testcrt
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
+    env_file:
+      - src/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
       backend:
 
 
 volumes:
   postgres_data:
+  log:
 
 networks:
   backend:

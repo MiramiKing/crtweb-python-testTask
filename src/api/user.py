@@ -2,11 +2,11 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from src import schemas
+from src.schemas import GetUsersParams, UserModel
 from fastapi import APIRouter, Depends
 
-from src.database.session import get_db
-from src.database.tables import User
+from src.database import get_db, User
+
 from src.schemas import UserModel, RegisterUserRequest
 
 router = APIRouter(
@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.get('/', summary='Get Users', tags=['users'], response_model=List[UserModel])
-def users_list(params: schemas.GetUsersParams = Depends(), db: Session = Depends(get_db)):
+def users_list(params: GetUsersParams = Depends(), db: Session = Depends(get_db)):
     """
     Список пользователей
     """
@@ -38,7 +38,7 @@ def users_list(params: schemas.GetUsersParams = Depends(), db: Session = Depends
     } for user in users]
 
 
-@router.post('/', summary='Create User', response_model=schemas.UserModel, tags=['users'])
+@router.post('/', summary='Create User', response_model=UserModel, tags=['users'])
 def register_user(*, db: Session = Depends(get_db), user: RegisterUserRequest):
     """
     Регистрация пользователя

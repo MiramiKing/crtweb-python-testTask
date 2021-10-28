@@ -4,8 +4,7 @@ import datetime as dt
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from src.database.session import get_db
-from src.database.tables import Picnic, City, PicnicRegistration, User
+from src.database import get_db, Picnic, City, PicnicRegistration, User
 from src.schemas import CreatePicnicRequest, CreatePicnicRegistrationRequest, GetPicnicWithUsers, \
     GetPicnicsParams, CreatePicnicResponse
 

@@ -3,8 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from src.database.tables import City
-from src.database.session import get_db
+from src.database import City, get_db
 from src.external_requests import WeatherClient
 from src.schemas import CityModel, CityParams, CityParamsGet
 
