@@ -1,6 +1,15 @@
+import logging
+import os
+
 import uvicorn
 from fastapi import FastAPI
 from api import city_router, picnic_router, user_router
+
+logging.basicConfig(filename=os.path.join('logs/', 'logs' + '.log'),
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
 
 app = FastAPI()
 

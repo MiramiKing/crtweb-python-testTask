@@ -1,15 +1,9 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-from external_requests import WeatherClient
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
-# Создание сессии
-SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
-engine = create_engine(SQLALCHEMY_DATABASE_URI)
-Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Подключение базы (с автоматической генерацией моделей)
-Base = declarative_base()
+from src.database.session import Base
+from src.external_requests import WeatherClient
+from src.database.session import engine
 
 
 class City(Base):

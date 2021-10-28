@@ -2,8 +2,10 @@ from typing import List
 
 import datetime as dt
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy.orm import Session
 
-from src.database import Picnic, Session, City, PicnicRegistration, User
+from src.database.session import get_db
+from src.database.tables import Picnic, City, PicnicRegistration, User
 from src.schemas import CreatePicnicRequest, CreatePicnicRegistrationRequest, GetPicnicWithUsers, \
     GetPicnicsParams, CreatePicnicResponse
 
@@ -13,19 +15,19 @@ router = APIRouter(
 
 
 @router.get('/', summary='All Picnics', response_model=List[GetPicnicWithUsers], tags=['picnic'])
-def all_picnics(q: GetPicnicsParams = Depends()):
+def all_picnics(q: GetPicnicsParams = Depends(), db: Session = Depends(get_db)):
     """
     Список всех пикников
     """
     datetime = q.time
     past = q.past
 
-    picnics = Session().query(Picnic, City)
+    picnics = db.query(Picnic, City)
     if datetime is not None:
         picnics = picnics.filter(Picnic.time == datetime)
     if not past:
         picnics = picnics.filter(Picnic.time >= dt.datetime.now())
-    picnics = picnics.join(City, Picnic.city_id == City.id)
+    picnics = picnics.join(City, Picnic.city_id == City.id).all()
 
     return [{
         'id': pic.id,
@@ -43,13 +45,13 @@ def all_picnics(q: GetPicnicsParams = Depends()):
 
 
 @router.post('/', summary='Picnic Add', response_model=CreatePicnicResponse, tags=['picnic'])
-def picnic_add(params: CreatePicnicRequest):
+def picnic_add(params: CreatePicnicRequest, db: Session = Depends(get_db)):
     city_id = params.city_id
     datetime = params.datetime
     if not city_id:
         raise HTTPException(status_code=400, detail='Параметр city_id не должен быть пустым')
 
-    city = Session().query(City).filter(City.id == city_id).first()
+    city = db.query(City).filter(City.id == city_id).first()
 
     if not city:
         raise HTTPException(status_code=400, detail='Параметр city_id должен быть существующим id города')
@@ -58,7 +60,7 @@ def picnic_add(params: CreatePicnicRequest):
         raise HTTPException(status_code=400, detail='Параметр datetime не должен быть пустым')
 
     p = Picnic(city_id=city_id, time=datetime)
-    s = Session()
+    s = db
     s.add(p)
     s.commit()
 
@@ -70,7 +72,7 @@ def picnic_add(params: CreatePicnicRequest):
 
 
 @router.post('/register/', summary='Picnic Registration', tags=['picnic'])
-def register_to_picnic(q: CreatePicnicRegistrationRequest):
+def register_to_picnic(q: CreatePicnicRegistrationRequest, db: Session = Depends(get_db)):
     """
     Регистрация пользователя на пикник
     """
@@ -80,7 +82,7 @@ def register_to_picnic(q: CreatePicnicRegistrationRequest):
     if not user_id:
         raise HTTPException(status_code=400, detail='Параметр user_id не должен быть пустым')
 
-    user = Session().query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         raise HTTPException(status_code=400, detail='Параметр user_id должен быть существующим id Пользователя')
@@ -88,13 +90,13 @@ def register_to_picnic(q: CreatePicnicRegistrationRequest):
     if not picnic_id:
         raise HTTPException(status_code=400, detail='Параметр picnic_id не должен быть пустым')
 
-    picnic = Session().query(Picnic).filter(Picnic.id == picnic_id).first()
+    picnic = db.query(Picnic).filter(Picnic.id == picnic_id).first()
 
     if not picnic:
         raise HTTPException(status_code=400, detail='Параметр picnic_id должен быть существующим id Пикник')
 
     p = PicnicRegistration(user_id=user_id, picnic_id=picnic_id)
-    s = Session()
+    s = db
     s.add(p)
     s.commit()
 

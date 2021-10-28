@@ -1,9 +1,12 @@
 from typing import List
 
+from sqlalchemy.orm import Session
+
 from src import schemas
 from fastapi import APIRouter, Depends
 
-from src.database import Session, User
+from src.database.session import get_db
+from src.database.tables import User
 from src.schemas import UserModel, RegisterUserRequest
 
 router = APIRouter(
@@ -12,11 +15,11 @@ router = APIRouter(
 
 
 @router.get('/', summary='Get Users', tags=['users'], response_model=List[UserModel])
-def users_list(params: schemas.GetUsersParams = Depends()):
+def users_list(params: schemas.GetUsersParams = Depends(), db: Session = Depends(get_db)):
     """
     Список пользователей
     """
-    users = Session().query(User)
+    users = db.query(User)
 
     if not params.min_age and not params.max_age:
         users = users.all()
@@ -36,12 +39,12 @@ def users_list(params: schemas.GetUsersParams = Depends()):
 
 
 @router.post('/', summary='Create User', response_model=schemas.UserModel, tags=['users'])
-def register_user(user: RegisterUserRequest):
+def register_user(*, db: Session = Depends(get_db), user: RegisterUserRequest):
     """
     Регистрация пользователя
     """
     user_object = User(**user.dict())
-    s = Session()
+    s = db
     s.add(user_object)
     s.commit()
 
