@@ -22,10 +22,11 @@ cd crtweb-python-testTask
 В папке src содержится файл переменных окружения .env как для подключения к БД, так и для контейнера postgres:
 
 ```
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
-DB_NAME=
+DATABASE_HOST=
+DATABASE_PORT=
+DATABASE_NAME=
+DATABASE_USER=
+DATABASE_PASSWORD=
 POSTGRES_DB=
 POSTGRES_USER=
 POSTGRES_PASSWORD=
