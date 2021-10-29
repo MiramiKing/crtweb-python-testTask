@@ -1,9 +1,9 @@
+from decimal import Decimal
 from typing import Optional
 
-from pydantic.dataclasses import dataclass
 from fastapi import Query
 from pydantic import BaseModel
-from decimal import Decimal
+from pydantic.dataclasses import dataclass
 
 
 class CityModel(BaseModel):

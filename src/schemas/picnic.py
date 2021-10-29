@@ -1,9 +1,9 @@
-from typing import Optional, List
-from pydantic.dataclasses import dataclass
+from datetime import datetime
+from typing import List, Optional
 
 from fastapi import Query
 from pydantic import BaseModel
-from datetime import datetime
+from pydantic.dataclasses import dataclass
 
 from src.schemas import UserModel
 

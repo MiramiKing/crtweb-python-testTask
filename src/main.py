@@ -1,9 +1,11 @@
 import logging
-from collections import Generator
-from fastapi import FastAPI
-from src.api import city_router, picnic_router, user_router
 import os
+from collections import Generator
+
+from fastapi import FastAPI
 from fastapi.logger import logger as fastapi_logger
+
+from src.api import city_router, picnic_router, user_router
 from src.database.session import SessionLocal
 
 logging.basicConfig(filename=os.path.join('logs/', 'logs' + '.log'),

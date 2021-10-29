@@ -1,9 +1,8 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from src.database.session import Base
+from src.database.session import Base, engine
 from src.external_requests import WeatherClient
-from src.database.session import engine
 
 
 class City(Base):

@@ -1,12 +1,10 @@
 from typing import List
 
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from fastapi import APIRouter, Depends
-
-from src.database import get_db, User
-
-from src.schemas import UserModel, RegisterUserRequest, GetUsersParams
+from src.database import User, get_db
+from src.schemas import GetUsersParams, RegisterUserRequest, UserModel
 
 router = APIRouter(
     prefix='/users'

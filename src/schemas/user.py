@@ -1,6 +1,6 @@
-from pydantic.dataclasses import dataclass
 from fastapi import Query
 from pydantic import BaseModel
+from pydantic.dataclasses import dataclass
 
 
 class RegisterUserRequest(BaseModel):

@@ -1,12 +1,13 @@
+import datetime as dt
 from typing import List
 
-import datetime as dt
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from src.database import get_db, Picnic, City, PicnicRegistration, User
-from src.schemas import CreatePicnicRequest, CreatePicnicRegistrationRequest, GetPicnicWithUsers, \
-    GetPicnicsParams, CreatePicnicResponse
+from src.database import City, Picnic, PicnicRegistration, User, get_db
+from src.schemas import (CreatePicnicRegistrationRequest, CreatePicnicRequest,
+                         CreatePicnicResponse, GetPicnicsParams,
+                         GetPicnicWithUsers)
 
 router = APIRouter(
     prefix='/picnics'
