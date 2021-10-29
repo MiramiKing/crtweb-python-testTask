@@ -2,12 +2,11 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from src.schemas import GetUsersParams, UserModel
 from fastapi import APIRouter, Depends
 
 from src.database import get_db, User
 
-from src.schemas import UserModel, RegisterUserRequest
+from src.schemas import UserModel, RegisterUserRequest, GetUsersParams
 
 router = APIRouter(
     prefix='/users'

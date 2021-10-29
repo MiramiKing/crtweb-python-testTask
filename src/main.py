@@ -3,7 +3,7 @@ from collections import Generator
 from fastapi import FastAPI
 from src.api import city_router, picnic_router, user_router
 import os
-
+from fastapi.logger import logger as fastapi_logger
 from src.database.session import SessionLocal
 
 logging.basicConfig(filename=os.path.join('logs/', 'logs' + '.log'),
@@ -13,6 +13,15 @@ logging.basicConfig(filename=os.path.join('logs/', 'logs' + '.log'),
                     level=logging.DEBUG)
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+async def startup_event():
+    logger = logging.getLogger("uvicorn.access")
+    handler = logging.FileHandler(os.path.join('logs/', 'logs' + '.log'))
+    handler.setFormatter(logging.Formatter("%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s","%H:%M:%S"))
+
+    logger.addHandler(handler)
 
 
 def get_db() -> Generator:
